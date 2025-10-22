@@ -1,0 +1,73 @@
+# SQL字段级血缘分析平台 - Git Ignore
+
+# ============ Java/Maven ============
+backend/target/
+backend/*.iml
+backend/*.ipr
+backend/*.iws
+backend/.idea/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/bin/
+backend/out/
+
+# ============ Spring Boot ============
+backend/logs/
+backend/*.log
+backend/*.gz
+backend/spring.log
+
+# ============ 数据库文件 ============
+backend/data/
+*.db
+*.sqlite
+*.h2.db
+
+# ============ IDE ============
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ============ 前端 ============
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.cache/
+frontend/*.log
+
+# ============ 临时文件 ============
+*.tmp
+*.bak
+*.swp
+*.cache
+.env.local
+.env.*.local
+
+# ============ 构建产物 ============
+*.jar
+*.war
+*.ear
+*.class
+
+# ============ 系统文件 ============
+Thumbs.db
+Desktop.ini
+
+# ============ 上传文件 ============
+uploads/
+temp/
+
+# ============ 测试覆盖率报告 ============
+coverage/
+*.coverage
+htmlcov/
+.pytest_cache/
+
+# ============ 其他 ============
+*.pid
+*.seed
+*.pid.lock

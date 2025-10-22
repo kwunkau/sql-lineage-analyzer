@@ -1,0 +1,201 @@
+# SQL字段级血缘分析平台 - 应用配置文件
+# 版本: v1.0
+# 创建时间: 2025-10-23
+
+spring:
+  application:
+    name: sql-lineage-analyzer
+  
+  # 环境配置
+  profiles:
+    active: dev
+  
+  # 数据源配置
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:./data/lineage;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    username: sa
+    password: 
+    
+    # Hikari连接池配置
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: LineageHikariPool
+  
+  # H2数据库控制台（开发环境）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  
+  # JPA配置
+  jpa:
+    show-sql: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+  
+  # 静态资源配置
+  web:
+    resources:
+      static-locations: classpath:/static/,classpath:/public/,file:./frontend/
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  tomcat:
+    uri-encoding: UTF-8
+    threads:
+      max: 200
+      min-spare: 10
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.lineage.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.lineage: DEBUG
+    com.alibaba.druid: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/lineage.log
+    max-size: 100MB
+    max-history: 30
+
+# 应用业务配置
+lineage:
+  # SQL解析配置
+  parser:
+    max-sql-length: 100000
+    timeout-seconds: 600
+    enable-cache: true
+    cache-expire-hours: 24
+    max-recursion-depth: 50
+  
+  # 支持的数据库类型
+  supported-db-types:
+    - mysql
+    - hive
+    - spark
+  
+  # 批量处理配置
+  batch:
+    enabled: true
+    pool-size: 10
+    queue-capacity: 1000
+  
+  # 导出配置
+  export:
+    temp-dir: ./temp/export
+    max-rows: 100000
+    formats:
+      - excel
+      - json
+      - csv
+  
+  # Kettle文件处理配置
+  kettle:
+    upload-dir: ./uploads/kettle
+    allowed-extensions:
+      - ktr
+      - kjb
+    max-file-size-mb: 50
+
+---
+# 开发环境配置
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+# 开发环境数据源（H2）
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/lineage_dev;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    initialization-mode: always
+    schema: classpath:sql/schema.sql
+    data: classpath:sql/init-data.sql
+
+logging:
+  level:
+    com.lineage: DEBUG
+
+lineage:
+  parser:
+    enable-cache: false  # 开发环境关闭缓存
+
+---
+# 生产环境配置
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+# 生产环境数据源（MySQL）
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/lineage_db?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 50
+      connection-timeout: 30000
+
+logging:
+  level:
+    com.lineage: INFO
+  file:
+    name: /var/log/lineage/application.log
+
+lineage:
+  parser:
+    enable-cache: true
+    timeout-seconds: 600

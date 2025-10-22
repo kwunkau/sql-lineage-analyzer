@@ -1,0 +1,1 @@
+F:/00Code/droid3/.agents/rules/base.md

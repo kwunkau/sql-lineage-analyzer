@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SQL字段级血缘分析平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <!-- 页面头部 -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>🔍 SQL 血缘分析平台</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="#analyze" class="nav-link active">SQL分析</a>
+                <a href="#metadata" class="nav-link">元数据管理</a>
+                <a href="#kettle" class="nav-link">Kettle解析</a>
+                <a href="#history" class="nav-link">历史记录</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="app-main">
+        <!-- SQL输入面板 -->
+        <section id="analyze" class="section-panel">
+            <div class="panel-header">
+                <h2>SQL 血缘分析</h2>
+            </div>
+            <div class="panel-body">
+                <!-- SQL输入表单 -->
+                <div class="form-group">
+                    <label for="dbType">数据库类型:</label>
+                    <select id="dbType" class="form-control">
+                        <option value="hive">Hive</option>
+                        <option value="mysql">MySQL</option>
+                        <option value="spark">Spark SQL</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sqlInput">SQL 语句:</label>
+                    <textarea id="sqlInput" class="form-control" rows="10" placeholder="请输入SQL语句...
+
+示例 (Hive):
+SELECT 
+    u.user_id,
+    u.user_name,
+    o.order_amount
+FROM dw_user_info u
+JOIN dw_order_detail o ON u.user_id = o.user_id
+WHERE o.order_date >= '2025-01-01'"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button id="analyzeBtn" class="btn btn-primary">开始分析</button>
+                    <button id="clearBtn" class="btn btn-secondary">清空</button>
+                    <button id="exportBtn" class="btn btn-success" disabled>导出Excel</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 分析结果展示区 -->
+        <section id="results" class="section-panel" style="display: none;">
+            <div class="panel-header">
+                <h2>血缘分析结果</h2>
+                <div class="view-switcher">
+                    <button class="view-btn active" data-view="table">表格视图</button>
+                    <button class="view-btn" data-view="tree">树形视图</button>
+                    <button class="view-btn" data-view="graph">DAG图</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <!-- 表格视图 -->
+                <div id="tableView" class="view-container">
+                    <table id="lineageTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>目标字段</th>
+                                <th>源表</th>
+                                <th>源字段</th>
+                                <th>转换逻辑</th>
+                                <th>依赖层级</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- 树形视图 -->
+                <div id="treeView" class="view-container" style="display: none;">
+                    <div id="treeContainer"></div>
+                </div>
+
+                <!-- DAG图视图 -->
+                <div id="graphView" class="view-container" style="display: none;">
+                    <div id="graphContainer"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 加载指示器 -->
+        <div id="loading" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>正在分析SQL血缘...</p>
+        </div>
+    </main>
+
+    <!-- 页面底部 -->
+    <footer class="app-footer">
+        <p>&copy; 2025 SQL字段级血缘分析平台 | 基于 Alibaba Druid</p>
+    </footer>
+
+    <!-- JavaScript库引入 -->
+    <script src="lib/axios.min.js"></script>
+    <script src="lib/g6.min.js"></script>
+    
+    <!-- 应用脚本 -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/table-view.js"></script>
+    <script src="js/tree-view.js"></script>
+    <script src="js/visualizer.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

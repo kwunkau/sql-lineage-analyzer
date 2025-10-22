@@ -1,0 +1,495 @@
+# SQL字段级血缘分析平台 - 任务清单
+# 项目周期: 15天 (2025-10-23 ~ 2025-11-07)
+
+project:
+  name: "SQL Field Lineage Analyzer"
+  description: "基于Alibaba Druid的SQL字段级血缘分析平台"
+  start_date: "2025-10-23"
+  deadline: "2025-11-07"
+  owner: "数据工程团队"
+  repository: "F:\\00Code\\droid3\\sql-lineage"
+
+# ============================================================
+#  里程碑 M0: 需求与设计（Day 1）
+# ============================================================
+milestones:
+  - id: "M0"
+    name: "需求与设计"
+    description: "完成需求分析、技术选型和架构设计"
+    priority: "critical"
+    status: "in_progress"
+    deadline: "Day 1"
+    acceptance_criteria:
+      - "需求访谈完成，需求文档就绪"
+      - "技术架构设计完成"
+      - "数据库表结构设计完成"
+      - "项目目录结构创建完成"
+      - "开发环境配置完成"
+    
+    epics:
+      # ===== E0.1: 技术方案设计 =====
+      - id: "E0.1"
+        name: "技术方案设计"
+        description: "确定技术栈、架构模式和开发规范"
+        priority: "critical"
+        status: "pending"
+        estimated_hours: 2
+        
+        stories:
+          - id: "S0.1.1"
+            title: "作为架构师，我需要完成技术选型和架构设计"
+            priority: "critical"
+            status: "pending"
+            acceptance_criteria:
+              - "后端技术栈明确（Spring Boot + Druid）"
+              - "前端技术栈明确（HTML/CSS/JS + AntV G6）"
+              - "数据库选型明确（H2/MySQL）"
+              - "架构图绘制完成"
+            
+            tasks:
+              - id: "T0.1.1.1"
+                title: "创建技术架构文档"
+                type: "documentation"
+                priority: "critical"
+                status: "pending"
+                estimated_minutes: 30
+                dependencies: []
+                assigned_to: "AI"
+                deliverables:
+                  - path: ".agents/docs/architecture.md"
+                    description: "技术架构设计文档，包含技术栈、分层架构、模块划分"
+                execution:
+                  action: "create_file"
+                  parameters:
+                    sections:
+                      - "技术栈选型"
+                      - "系统架构图"
+                      - "模块划分"
+                      - "技术风险评估"
+              
+              - id: "T0.1.1.2"
+                title: "制定开发规范文档"
+                type: "documentation"
+                priority: "high"
+                status: "pending"
+                estimated_minutes: 20
+                dependencies: []
+                assigned_to: "AI"
+                deliverables:
+                  - path: ".agents/docs/coding-standards.md"
+                    description: "代码规范、命名规范、注释规范"
+      
+      # ===== E0.2: 数据库设计 =====
+      - id: "E0.2"
+        name: "数据库设计"
+        description: "设计元数据存储结构和血缘分析结果表"
+        priority: "critical"
+        status: "pending"
+        estimated_hours: 2
+        
+        stories:
+          - id: "S0.2.1"
+            title: "作为数据库设计师，我需要设计完整的数据模型"
+            priority: "critical"
+            status: "pending"
+            tasks:
+              - id: "T0.2.1.1"
+                title: "设计元数据表结构"
+                type: "database_design"
+                priority: "critical"
+                status: "pending"
+                estimated_minutes: 45
+                dependencies: ["T0.1.1.1"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "docs/database/schema.sql"
+                    description: "数据库建表SQL脚本"
+                  - path: "docs/database/er-diagram.md"
+                    description: "ER图和表关系说明"
+                execution:
+                  action: "design_database"
+                  parameters:
+                    tables:
+                      - metadata_database
+                      - metadata_table
+                      - metadata_column
+                      - lineage_analysis
+                      - lineage_field_relation
+                      - kettle_file_history
+              
+              - id: "T0.2.1.2"
+                title: "创建初始化数据SQL"
+                type: "database_design"
+                priority: "medium"
+                status: "pending"
+                estimated_minutes: 15
+                dependencies: ["T0.2.1.1"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "docs/database/init-data.sql"
+                    description: "初始化测试数据"
+      
+      # ===== E0.3: 项目初始化 =====
+      - id: "E0.3"
+        name: "项目初始化"
+        description: "创建项目骨架和目录结构"
+        priority: "high"
+        status: "pending"
+        estimated_hours: 2
+        
+        stories:
+          - id: "S0.3.1"
+            title: "作为开发者，我需要创建后端项目结构"
+            priority: "high"
+            status: "pending"
+            tasks:
+              - id: "T0.3.1.1"
+                title: "创建Spring Boot项目骨架"
+                type: "scaffolding"
+                priority: "high"
+                status: "pending"
+                estimated_minutes: 30
+                dependencies: ["T0.1.1.1", "T0.2.1.1"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/pom.xml"
+                    description: "Maven配置文件"
+                  - path: "backend/src/main/java/com/lineage/Application.java"
+                    description: "Spring Boot启动类"
+                  - path: "backend/src/main/resources/application.yml"
+                    description: "应用配置文件"
+                execution:
+                  action: "create_spring_boot_project"
+                  parameters:
+                    groupId: "com.lineage"
+                    artifactId: "sql-lineage-analyzer"
+                    version: "1.0.0-SNAPSHOT"
+                    javaVersion: "8"
+                    dependencies:
+                      - "spring-boot-starter-web"
+                      - "druid:1.2.20"
+                      - "mybatis-plus-boot-starter:3.5.3"
+                      - "h2database"
+                      - "lombok"
+                      - "hutool-all:5.8.16"
+              
+              - id: "T0.3.1.2"
+                title: "创建标准目录结构"
+                type: "scaffolding"
+                priority: "high"
+                status: "pending"
+                estimated_minutes: 15
+                dependencies: ["T0.3.1.1"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/src/main/java/com/lineage/controller/"
+                    description: "控制器目录"
+                  - path: "backend/src/main/java/com/lineage/service/"
+                    description: "服务层目录"
+                  - path: "backend/src/main/java/com/lineage/mapper/"
+                    description: "数据访问层目录"
+                  - path: "backend/src/main/java/com/lineage/entity/"
+                    description: "实体类目录"
+                  - path: "backend/src/main/java/com/lineage/dto/"
+                    description: "DTO目录"
+                  - path: "backend/src/main/java/com/lineage/core/"
+                    description: "核心引擎目录"
+                  - path: "backend/src/test/java/com/lineage/"
+                    description: "测试目录"
+          
+          - id: "S0.3.2"
+            title: "作为开发者，我需要创建前端项目结构"
+            priority: "high"
+            status: "pending"
+            tasks:
+              - id: "T0.3.2.1"
+                title: "创建前端目录结构"
+                type: "scaffolding"
+                priority: "high"
+                status: "pending"
+                estimated_minutes: 20
+                dependencies: ["T0.1.1.1"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "frontend/index.html"
+                    description: "主页面"
+                  - path: "frontend/css/style.css"
+                    description: "样式文件"
+                  - path: "frontend/js/main.js"
+                    description: "主JS文件"
+                  - path: "frontend/js/api.js"
+                    description: "API调用封装"
+                  - path: "frontend/js/visualizer.js"
+                    description: "血缘图可视化"
+
+# ============================================================
+#  里程碑 M1: 核心引擎原型（Day 2-3）
+# ============================================================
+  - id: "M1"
+    name: "核心引擎原型"
+    description: "实现基础SQL解析和简单字段血缘分析"
+    priority: "critical"
+    status: "pending"
+    deadline: "Day 3"
+    dependencies: ["M0"]
+    acceptance_criteria:
+      - "可解析简单SELECT语句（单表）"
+      - "可提取字段列表和表信息"
+      - "可输出JSON格式的血缘关系"
+      - "提供REST API接口"
+      - "单元测试通过"
+    
+    epics:
+      - id: "E1.1"
+        name: "Druid SQL解析器集成"
+        description: "集成Druid解析器，实现多方言SQL解析"
+        priority: "critical"
+        status: "pending"
+        estimated_hours: 4
+        
+        stories:
+          - id: "S1.1.1"
+            title: "作为开发者，我需要封装Druid解析器"
+            priority: "critical"
+            status: "pending"
+            tasks:
+              - id: "T1.1.1.1"
+                title: "创建DruidParserService"
+                type: "development"
+                priority: "critical"
+                status: "pending"
+                estimated_minutes: 60
+                dependencies: ["T0.3.1.2"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/src/main/java/com/lineage/service/DruidParserService.java"
+                    description: "Druid解析服务类"
+                execution:
+                  action: "generate_code"
+                  parameters:
+                    class_name: "DruidParserService"
+                    methods:
+                      - name: "parseSQL"
+                        params: ["String sql", "String dbType"]
+                        return: "SQLStatement"
+                      - name: "getSupportedDbTypes"
+                        return: "List<String>"
+              
+              - id: "T1.1.1.2"
+                title: "实现多数据库方言支持"
+                type: "development"
+                priority: "high"
+                status: "pending"
+                estimated_minutes: 45
+                dependencies: ["T1.1.1.1"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/src/main/java/com/lineage/core/dialect/DbTypeResolver.java"
+                    description: "数据库方言解析器"
+              
+              - id: "T1.1.1.3"
+                title: "编写解析器单元测试"
+                type: "testing"
+                priority: "high"
+                status: "pending"
+                estimated_minutes: 30
+                dependencies: ["T1.1.1.2"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/src/test/java/com/lineage/service/DruidParserServiceTest.java"
+                    description: "解析器测试类"
+      
+      - id: "E1.2"
+        name: "字段血缘分析引擎"
+        description: "实现基础的字段依赖追踪算法"
+        priority: "critical"
+        status: "pending"
+        estimated_hours: 6
+        
+        stories:
+          - id: "S1.2.1"
+            title: "作为开发者，我需要实现字段血缘分析核心算法"
+            priority: "critical"
+            status: "pending"
+            tasks:
+              - id: "T1.2.1.1"
+                title: "创建LineageAnalyzer核心类"
+                type: "development"
+                priority: "critical"
+                status: "pending"
+                estimated_minutes: 90
+                dependencies: ["T1.1.1.2"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/src/main/java/com/lineage/core/LineageAnalyzer.java"
+                    description: "血缘分析核心类"
+              
+              - id: "T1.2.1.2"
+                title: "实现AST访问者模式"
+                type: "development"
+                priority: "critical"
+                status: "pending"
+                estimated_minutes: 90
+                dependencies: ["T1.2.1.1"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/src/main/java/com/lineage/core/visitor/LineageVisitor.java"
+                    description: "AST访问者类"
+              
+              - id: "T1.2.1.3"
+                title: "实现字段依赖追踪"
+                type: "development"
+                priority: "critical"
+                status: "pending"
+                estimated_minutes: 120
+                dependencies: ["T1.2.1.2"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/src/main/java/com/lineage/core/tracker/FieldDependencyTracker.java"
+                    description: "字段依赖追踪器"
+      
+      - id: "E1.3"
+        name: "REST API开发"
+        description: "提供HTTP接口供前端调用"
+        priority: "high"
+        status: "pending"
+        estimated_hours: 3
+        
+        stories:
+          - id: "S1.3.1"
+            title: "作为前端开发者，我需要调用解析API"
+            priority: "high"
+            status: "pending"
+            tasks:
+              - id: "T1.3.1.1"
+                title: "创建LineageController"
+                type: "development"
+                priority: "high"
+                status: "pending"
+                estimated_minutes: 45
+                dependencies: ["T1.2.1.3"]
+                assigned_to: "AI"
+                deliverables:
+                  - path: "backend/src/main/java/com/lineage/controller/LineageController.java"
+                    description: "血缘分析控制器"
+                execution:
+                  action: "generate_code"
+                  parameters:
+                    endpoints:
+                      - path: "/api/lineage/analyze"
+                        method: "POST"
+                        request: "AnalyzeRequest"
+                        response: "LineageResult"
+
+# ============================================================
+#  里程碑 M2: 完整解析能力（Day 4-7）
+# ============================================================
+  - id: "M2"
+    name: "完整解析能力"
+    description: "支持所有SQL类型：JOIN、子查询、UNION、窗口函数"
+    priority: "high"
+    status: "pending"
+    deadline: "Day 7"
+    dependencies: ["M1"]
+    acceptance_criteria:
+      - "支持多表JOIN解析"
+      - "支持子查询（嵌套、派生表）"
+      - "支持UNION/UNION ALL"
+      - "支持窗口函数"
+      - "单元测试覆盖率 > 80%"
+      - "处理1000+行SQL不崩溃"
+    
+    epics:
+      - id: "E2.1"
+        name: "复杂SQL支持"
+        description: "扩展解析器支持复杂SQL结构"
+        priority: "high"
+        status: "pending"
+        estimated_hours: 16
+        # 详细任务省略...
+
+# ============================================================
+#  里程碑 M3: Kettle+元数据（Day 8-10）
+# ============================================================
+  - id: "M3"
+    name: "Kettle解析与元数据管理"
+    description: "支持Kettle文件解析和元数据CRUD"
+    priority: "high"
+    status: "pending"
+    deadline: "Day 10"
+    dependencies: ["M2"]
+    acceptance_criteria:
+      - "可解析Kettle .ktr文件"
+      - "批量提取Kettle中的SQL"
+      - "元数据CRUD接口完成"
+      - "支持从数据库导入元数据"
+    
+    epics:
+      - id: "E3.1"
+        name: "Kettle文件解析"
+        # 详细任务省略...
+      
+      - id: "E3.2"
+        name: "元数据管理"
+        # 详细任务省略...
+
+# ============================================================
+#  里程碑 M4: 前端可视化（Day 11-13）
+# ============================================================
+  - id: "M4"
+    name: "前端可视化"
+    description: "实现表格、树形、DAG多种展示方式"
+    priority: "medium"
+    status: "pending"
+    deadline: "Day 13"
+    dependencies: ["M3"]
+    acceptance_criteria:
+      - "表格展示字段血缘"
+      - "树形结构展示层级依赖"
+      - "DAG图可视化血缘关系"
+      - "支持交互（点击、缩放、筛选）"
+      - "Excel导出功能"
+    # 详细Epic省略...
+
+# ============================================================
+#  里程碑 M5: 性能优化与部署（Day 14-15）
+# ============================================================
+  - id: "M5"
+    name: "性能优化与部署"
+    description: "性能测试、优化、内网部署"
+    priority: "high"
+    status: "pending"
+    deadline: "Day 15"
+    dependencies: ["M4"]
+    acceptance_criteria:
+      - "1000+行SQL在600秒内完成"
+      - "20+表解析准确率 > 95%"
+      - "批量处理支持异步"
+      - "内网部署成功"
+      - "使用文档完成"
+    # 详细Epic省略...
+
+# ============================================================
+#  全局配置
+# ============================================================
+config:
+  auto_execution: false  # 手动执行模式
+  execution_policy:
+    mode: "conservative"  # 保守模式，每个任务前需确认
+    max_parallel_tasks: 1
+    require_confirmation: true
+  
+  task_status_enum:
+    - "pending"
+    - "ready"
+    - "in_progress"
+    - "blocked"
+    - "completed"
+    - "skipped"
+    - "failed"
+  
+  priority_enum:
+    - "critical"  # P0
+    - "high"      # P1
+    - "medium"    # P2
+    - "low"       # P3

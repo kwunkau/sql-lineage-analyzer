@@ -1,0 +1,165 @@
+/* SQL字段级血缘分析平台 - 组件样式 */
+
+/* ============ 卡片组件 ============ */
+.card {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.card-title {
+  font-size: var(--font-size-large);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.card-content {
+  color: var(--text-secondary);
+}
+
+/* ============ 标签组件 ============ */
+.tag {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: var(--font-size-small);
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  color: var(--text-secondary);
+}
+
+.tag-primary {
+  background-color: #e6f7ff;
+  color: var(--primary-color);
+}
+
+.tag-success {
+  background-color: #f6ffed;
+  color: var(--success-color);
+}
+
+.tag-warning {
+  background-color: #fffbe6;
+  color: var(--warning-color);
+}
+
+.tag-error {
+  background-color: #fff1f0;
+  color: var(--error-color);
+}
+
+/* ============ 消息提示组件 ============ */
+.message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 300px;
+  padding: var(--spacing-md);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.message-success {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: var(--success-color);
+}
+
+.message-error {
+  background-color: #fff1f0;
+  border: 1px solid #ffccc7;
+  color: var(--error-color);
+}
+
+.message-warning {
+  background-color: #fffbe6;
+  border: 1px solid #ffe58f;
+  color: var(--warning-color);
+}
+
+.message-info {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  color: var(--primary-color);
+}
+
+/* ============ 工具提示组件 ============ */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #262626;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: var(--spacing-sm);
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ============ 分隔线 ============ */
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: var(--spacing-md) 0;
+}
+
+/* ============ 空状态组件 ============ */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-disabled);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state-text {
+  font-size: var(--font-size-large);
+}
+
+/* ============ 进度条组件 ============ */
+.progress {
+  width: 100%;
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: var(--primary-color);
+  transition: width 0.3s;
+}
