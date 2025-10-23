@@ -25,10 +25,11 @@
 
     /**
      * 导出Excel
+     * @param {Object} lineageResult - 血缘分析结果
      * @returns {Promise} 导出结果
      */
-    static async exportExcel() {
-      const response = await axios.get(`${API_BASE_URL}/export/excel`, {
+    static async exportExcel(lineageResult) {
+      const response = await axios.post(`${API_BASE_URL}/export/excel`, lineageResult, {
         responseType: 'blob'
       });
       
