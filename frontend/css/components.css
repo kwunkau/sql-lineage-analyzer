@@ -271,6 +271,45 @@
   cursor: not-allowed;
 }
 
+/* ============ 树形视图组件 ============ */
+.tree-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: #fafafa;
+  border-radius: 4px;
+}
+
+.tree-controls .control-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.tree-controls label {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.tree-controls select {
+  min-width: 200px;
+}
+
+.tree-canvas {
+  width: 100%;
+  height: 600px;
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .table-controls {
@@ -293,5 +332,23 @@
 
   .pagination-controls {
     font-size: var(--font-size-small);
+  }
+
+  .tree-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tree-controls .control-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tree-controls select {
+    min-width: 100%;
+  }
+
+  .tree-canvas {
+    height: 400px;
   }
 }
