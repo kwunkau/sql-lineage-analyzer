@@ -164,6 +164,113 @@
   transition: width 0.3s;
 }
 
+/* ============ 表格视图组件 ============ */
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.search-box {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-box input {
+  flex: 1;
+}
+
+.table-stats {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-bottom: var(--spacing-md);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--card-background);
+  box-shadow: var(--shadow);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.data-table thead th {
+  background-color: #fafafa;
+  padding: var(--spacing-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+}
+
+.data-table thead th:hover {
+  background-color: #f0f0f0;
+}
+
+.data-table thead th.sort-asc::after {
+  content: ' ▲';
+  color: var(--primary-color);
+  font-size: 12px;
+}
+
+.data-table thead th.sort-desc::after {
+  content: ' ▼';
+  color: var(--primary-color);
+  font-size: 12px;
+}
+
+.data-table tbody td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.data-table tbody tr:hover {
+  background-color: #fafafa;
+  cursor: pointer;
+}
+
+.data-table tbody tr.active {
+  background-color: #e6f7ff;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-md);
+}
+
+.page-info {
+  margin: 0 var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ============ 树形视图组件 ============ */
 .tree-controls {
   display: flex;
@@ -205,6 +312,28 @@
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .table-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .data-table {
+    font-size: var(--font-size-small);
+  }
+
+  .data-table thead th,
+  .data-table tbody td {
+    padding: var(--spacing-sm);
+  }
+
+  .pagination-controls {
+    font-size: var(--font-size-small);
+  }
+
   .tree-controls {
     flex-direction: column;
     align-items: stretch;

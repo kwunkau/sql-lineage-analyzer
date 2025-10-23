@@ -67,6 +67,9 @@ coverage/
 htmlcov/
 .pytest_cache/
 
+# ============ Agent配置 ============
+.agents/rules/
+
 # ============ 其他 ============
 *.pid
 *.seed
