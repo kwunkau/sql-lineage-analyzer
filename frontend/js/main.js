@@ -3,6 +3,9 @@
 (function() {
   'use strict';
 
+  // 保存最近的分析结果
+  let currentLineageResult = null;
+
   // ============ 应用初始化 ============
   document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -70,6 +73,9 @@
       // 调用API
       const result = await window.LineageAPI.analyze(sql, dbType.value);
       
+      // 保存分析结果
+      currentLineageResult = result;
+      
       // 显示结果
       displayResults(result);
       
@@ -92,15 +98,21 @@
     document.getElementById('sqlInput').value = '';
     document.getElementById('results').style.display = 'none';
     document.getElementById('exportBtn').disabled = true;
+    currentLineageResult = null;
   }
 
   /**
    * 处理导出操作
    */
   async function handleExport() {
+    if (!currentLineageResult) {
+      showMessage('请先分析SQL', 'warning');
+      return;
+    }
+
     try {
       showLoading(true);
-      await window.LineageAPI.exportExcel();
+      await window.LineageAPI.exportExcel(currentLineageResult);
       showMessage('导出成功', 'success');
     } catch (error) {
       console.error('导出失败:', error);
