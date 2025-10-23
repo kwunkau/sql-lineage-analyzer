@@ -152,9 +152,6 @@ spring:
   config:
     activate:
       on-profile: dev
-
-# 开发环境数据源（H2）
-spring:
   datasource:
     url: jdbc:h2:file:./data/lineage_dev;MODE=MySQL;DATABASE_TO_LOWER=TRUE
     initialization-mode: always
@@ -175,15 +172,11 @@ spring:
   config:
     activate:
       on-profile: prod
-
-# 生产环境数据源（MySQL）
-spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/lineage_db?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
-    
     hikari:
       minimum-idle: 10
       maximum-pool-size: 50
