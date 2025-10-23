@@ -189,4 +189,90 @@ class LineageAnalyzerTest {
         assertFalse(result.getTables().isEmpty());
         assertFalse(result.getFieldDependencies().isEmpty());
     }
+    
+    // ==================== JOIN Tests ====================
+    
+    @Test
+    void testAnalyzeInnerJoin() {
+        String sql = "SELECT u.id, u.name, o.amount FROM users u INNER JOIN orders o ON u.id = o.user_id";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertTrue(result.getTables().contains("users"));
+        assertTrue(result.getTables().contains("orders"));
+        assertEquals(3, result.getFieldDependencies().size());
+    }
+    
+    @Test
+    void testAnalyzeLeftJoin() {
+        String sql = "SELECT u.name, o.status FROM users u LEFT JOIN orders o ON u.id = o.user_id";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertEquals(2, result.getFieldDependencies().size());
+        
+        FieldDependency dep1 = result.getFieldDependencies().get(0);
+        assertEquals("users", dep1.getSourceTable());
+        assertTrue(dep1.getSourceFields().contains("name"));
+        
+        FieldDependency dep2 = result.getFieldDependencies().get(1);
+        assertEquals("orders", dep2.getSourceTable());
+        assertTrue(dep2.getSourceFields().contains("status"));
+    }
+    
+    @Test
+    void testAnalyzeRightJoin() {
+        String sql = "SELECT u.id, o.order_id FROM users u RIGHT JOIN orders o ON u.id = o.user_id";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertEquals(2, result.getFieldDependencies().size());
+    }
+    
+    @Test
+    void testAnalyzeMultipleJoins() {
+        String sql = "SELECT u.name, o.amount, p.product_name " +
+                    "FROM users u " +
+                    "INNER JOIN orders o ON u.id = o.user_id " +
+                    "INNER JOIN products p ON o.product_id = p.id";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(3, result.getTables().size());
+        assertTrue(result.getTables().contains("users"));
+        assertTrue(result.getTables().contains("orders"));
+        assertTrue(result.getTables().contains("products"));
+        assertEquals(3, result.getFieldDependencies().size());
+    }
+    
+    @Test
+    void testAnalyzeJoinWithoutAlias() {
+        String sql = "SELECT users.id, orders.amount FROM users INNER JOIN orders ON users.id = orders.user_id";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertEquals(2, result.getFieldDependencies().size());
+    }
+    
+    @Test
+    void testAnalyzeJoinWithAggregation() {
+        String sql = "SELECT u.dept, COUNT(o.id) AS order_count " +
+                    "FROM users u " +
+                    "LEFT JOIN orders o ON u.id = o.user_id " +
+                    "GROUP BY u.dept";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertEquals(2, result.getFieldDependencies().size());
+        
+        // 验证聚合函数
+        boolean hasAggregation = result.getFieldDependencies().stream()
+                .anyMatch(FieldDependency::isAggregation);
+        assertTrue(hasAggregation);
+    }
 }
