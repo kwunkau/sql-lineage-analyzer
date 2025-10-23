@@ -163,3 +163,62 @@
   background-color: var(--primary-color);
   transition: width 0.3s;
 }
+
+/* ============ DAG 图可视化组件 ============ */
+.graph-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: #fafafa;
+  border-radius: 4px;
+}
+
+.graph-controls .control-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.graph-canvas {
+  width: 100%;
+  height: 600px;
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.g6-minimap {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .graph-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .graph-controls .control-group {
+    flex-wrap: wrap;
+  }
+
+  .graph-canvas {
+    height: 400px;
+  }
+
+  .g6-minimap {
+    right: 5px;
+    bottom: 5px;
+  }
+}
