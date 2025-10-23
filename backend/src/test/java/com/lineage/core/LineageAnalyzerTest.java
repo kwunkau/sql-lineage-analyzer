@@ -420,4 +420,117 @@ class LineageAnalyzerTest {
         assertEquals(2, result.getTables().size());
         assertEquals(4, result.getFieldDependencies().size());
     }
+    
+    // ==================== Window Function Tests ====================
+    
+    @Test
+    void testAnalyzeRowNumberWindowFunction() {
+        String sql = "SELECT ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) AS rn, name FROM employees";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getTables().size());
+        assertTrue(result.getTables().contains("employees"));
+        assertEquals(2, result.getFieldDependencies().size());
+        
+        FieldDependency rnDep = result.getFieldDependencies().get(0);
+        assertEquals("rn", rnDep.getTargetAlias());
+        assertTrue(rnDep.isAggregation());
+        assertTrue(rnDep.getSourceFields().contains("dept"));
+        assertTrue(rnDep.getSourceFields().contains("salary"));
+    }
+    
+    @Test
+    void testAnalyzeRankWindowFunction() {
+        String sql = "SELECT RANK() OVER (PARTITION BY category ORDER BY price DESC) AS price_rank, product_name FROM products";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getTables().size());
+        assertEquals(2, result.getFieldDependencies().size());
+        
+        FieldDependency rankDep = result.getFieldDependencies().get(0);
+        assertEquals("price_rank", rankDep.getTargetAlias());
+        assertTrue(rankDep.isAggregation());
+        assertTrue(rankDep.getSourceFields().contains("category"));
+        assertTrue(rankDep.getSourceFields().contains("price"));
+    }
+    
+    @Test
+    void testAnalyzeLagWindowFunction() {
+        String sql = "SELECT LAG(amount, 1) OVER (ORDER BY order_date) AS prev_amount FROM orders";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getTables().size());
+        assertEquals(1, result.getFieldDependencies().size());
+        
+        FieldDependency lagDep = result.getFieldDependencies().get(0);
+        assertEquals("prev_amount", lagDep.getTargetAlias());
+        assertTrue(lagDep.isAggregation());
+        assertTrue(lagDep.getSourceFields().contains("amount"));
+        assertTrue(lagDep.getSourceFields().contains("order_date"));
+    }
+    
+    @Test
+    void testAnalyzeLeadWindowFunction() {
+        String sql = "SELECT LEAD(price, 1) OVER (ORDER BY product_id) AS next_price, product_name FROM products";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getTables().size());
+        assertEquals(2, result.getFieldDependencies().size());
+        
+        FieldDependency leadDep = result.getFieldDependencies().get(0);
+        assertEquals("next_price", leadDep.getTargetAlias());
+        assertTrue(leadDep.isAggregation());
+        assertTrue(leadDep.getSourceFields().contains("price"));
+        assertTrue(leadDep.getSourceFields().contains("product_id"));
+    }
+    
+    @Test
+    void testAnalyzeDenseRankWindowFunction() {
+        String sql = "SELECT DENSE_RANK() OVER (ORDER BY score DESC) AS rank, student_name FROM students";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getTables().size());
+        assertEquals(2, result.getFieldDependencies().size());
+        
+        FieldDependency denseRankDep = result.getFieldDependencies().get(0);
+        assertEquals("rank", denseRankDep.getTargetAlias());
+        assertTrue(denseRankDep.isAggregation());
+        assertTrue(denseRankDep.getSourceFields().contains("score"));
+    }
+    
+    @Test
+    void testAnalyzeWindowFunctionWithTableAlias() {
+        String sql = "SELECT e.name, ROW_NUMBER() OVER (PARTITION BY e.dept ORDER BY e.salary) AS rn FROM employees e";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getTables().size());
+        assertEquals(2, result.getFieldDependencies().size());
+        
+        FieldDependency rnDep = result.getFieldDependencies().get(1);
+        assertEquals("rn", rnDep.getTargetAlias());
+        assertTrue(rnDep.isAggregation());
+        assertEquals("employees", rnDep.getSourceTable());
+        assertEquals("e", rnDep.getSourceTableAlias());
+    }
+    
+    @Test
+    void testAnalyzeWindowFunctionWithMultiplePartitions() {
+        String sql = "SELECT ROW_NUMBER() OVER (PARTITION BY dept, team ORDER BY salary DESC) AS rn FROM employees";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getFieldDependencies().size());
+        
+        FieldDependency rnDep = result.getFieldDependencies().get(0);
+        assertTrue(rnDep.isAggregation());
+        assertTrue(rnDep.getSourceFields().contains("dept"));
+        assertTrue(rnDep.getSourceFields().contains("team"));
+        assertTrue(rnDep.getSourceFields().contains("salary"));
+    }
 }

@@ -256,17 +256,37 @@ public class LineageVisitor extends SQLASTVisitorAdapter {
     }
     
     /**
-     * 访问聚合函数
+     * 访问聚合函数（包括窗口函数）
      */
     @Override
     public boolean visit(SQLAggregateExpr x) {
         if (currentDependency != null) {
             currentDependency.setAggregation(true);
             currentDependency.setExpression(x.toString());
-            log.debug("Found aggregation: {}", x.getMethodName());
+            
+            // 检查是否为窗口函数
+            if (x.getOver() != null) {
+                log.debug("Found window function: {}", x.getMethodName());
+                
+                // 提取 PARTITION BY 字段
+                if (x.getOver().getPartitionBy() != null) {
+                    for (SQLExpr partitionExpr : x.getOver().getPartitionBy()) {
+                        partitionExpr.accept(this);
+                    }
+                }
+                
+                // 提取 ORDER BY 字段
+                if (x.getOver().getOrderBy() != null && x.getOver().getOrderBy().getItems() != null) {
+                    for (SQLSelectOrderByItem item : x.getOver().getOrderBy().getItems()) {
+                        item.getExpr().accept(this);
+                    }
+                }
+            } else {
+                log.debug("Found aggregation: {}", x.getMethodName());
+            }
         }
         
-        // 递归访问参数
+        // 递归访问参数（窗口函数的参数，如 LAG(amount, 1) 中的 amount）
         for (SQLExpr arg : x.getArguments()) {
             arg.accept(this);
         }
