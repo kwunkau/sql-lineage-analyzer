@@ -356,4 +356,68 @@ class LineageAnalyzerTest {
                 .anyMatch(FieldDependency::isAggregation);
         assertFalse(hasAggregation); // 外层不应该有聚合标记
     }
+    
+    // ==================== UNION Tests ====================
+    
+    @Test
+    void testAnalyzeSimpleUnion() {
+        String sql = "SELECT id, name FROM users UNION SELECT id, name FROM customers";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertTrue(result.getTables().contains("users"));
+        assertTrue(result.getTables().contains("customers"));
+        // UNION 合并两个 SELECT，会有 4 个字段依赖（每个 SELECT 2个）
+        assertEquals(4, result.getFieldDependencies().size());
+    }
+    
+    @Test
+    void testAnalyzeUnionAll() {
+        String sql = "SELECT id FROM orders_2023 UNION ALL SELECT id FROM orders_2024";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertTrue(result.getTables().contains("orders_2023"));
+        assertTrue(result.getTables().contains("orders_2024"));
+        assertEquals(2, result.getFieldDependencies().size());
+    }
+    
+    @Test
+    void testAnalyzeMultipleUnion() {
+        String sql = "SELECT id FROM users UNION SELECT id FROM customers UNION SELECT id FROM partners";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(3, result.getTables().size());
+        assertTrue(result.getTables().contains("users"));
+        assertTrue(result.getTables().contains("customers"));
+        assertTrue(result.getTables().contains("partners"));
+        assertEquals(3, result.getFieldDependencies().size());
+    }
+    
+    @Test
+    void testAnalyzeUnionWithAlias() {
+        String sql = "SELECT id AS user_id, name AS user_name FROM users " +
+                    "UNION " +
+                    "SELECT id AS customer_id, name AS customer_name FROM customers";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertEquals(4, result.getFieldDependencies().size());
+    }
+    
+    @Test
+    void testAnalyzeUnionWithWhere() {
+        String sql = "SELECT id, name FROM users WHERE age > 18 " +
+                    "UNION " +
+                    "SELECT id, name FROM customers WHERE status = 'active'";
+        LineageResult result = analyzer.analyze(sql, "mysql");
+
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getTables().size());
+        assertEquals(4, result.getFieldDependencies().size());
+    }
 }

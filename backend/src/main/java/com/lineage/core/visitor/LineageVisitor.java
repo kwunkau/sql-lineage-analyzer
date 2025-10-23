@@ -60,6 +60,29 @@ public class LineageVisitor extends SQLASTVisitorAdapter {
     }
     
     /**
+     * 访问 UNION 查询
+     * 例如: SELECT id FROM users UNION SELECT id FROM customers
+     */
+    @Override
+    public boolean visit(SQLUnionQuery x) {
+        log.debug("Visiting UNION query");
+        
+        // UNION 会合并多个查询的结果
+        // 递归访问所有查询分支
+        SQLSelectQuery left = x.getLeft();
+        if (left != null) {
+            left.accept(this);
+        }
+        
+        SQLSelectQuery right = x.getRight();
+        if (right != null) {
+            right.accept(this);
+        }
+        
+        return false;
+    }
+    
+    /**
      * 访问表引用
      */
     @Override
