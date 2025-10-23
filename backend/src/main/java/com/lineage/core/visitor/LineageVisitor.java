@@ -85,6 +85,31 @@ public class LineageVisitor extends SQLASTVisitorAdapter {
     }
     
     /**
+     * 访问 JOIN 表引用
+     */
+    @Override
+    public boolean visit(SQLJoinTableSource x) {
+        log.debug("Visiting JOIN table source: {}", x.getJoinType());
+        
+        // 访问左表
+        SQLTableSource left = x.getLeft();
+        if (left != null) {
+            left.accept(this);
+        }
+        
+        // 访问右表
+        SQLTableSource right = x.getRight();
+        if (right != null) {
+            right.accept(this);
+        }
+        
+        // ON 条件不影响字段血缘，只是连接条件
+        // 如果需要分析 ON 条件中的字段关系，可以在这里处理
+        
+        return false;
+    }
+    
+    /**
      * 访问 SELECT 列表项
      */
     @Override
