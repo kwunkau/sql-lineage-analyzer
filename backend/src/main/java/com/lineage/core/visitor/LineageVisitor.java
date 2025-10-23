@@ -110,6 +110,50 @@ public class LineageVisitor extends SQLASTVisitorAdapter {
     }
     
     /**
+     * 访问子查询表（派生表）
+     * 例如: FROM (SELECT id, name FROM users) t
+     */
+    @Override
+    public boolean visit(SQLSubqueryTableSource x) {
+        String alias = x.getAlias();
+        log.debug("Visiting subquery table source with alias: {}", alias);
+        
+        // 保存当前字段依赖列表的大小
+        int previousDependencyCount = result.getFieldDependencies().size();
+        
+        // 递归访问子查询，只提取表信息
+        SQLSelect select = x.getSelect();
+        if (select != null) {
+            SQLSelectQuery query = select.getQuery();
+            if (query != null) {
+                // 递归处理子查询
+                query.accept(this);
+            }
+        }
+        
+        // 移除子查询中添加的字段依赖（子查询不应该影响外层的字段依赖）
+        int currentDependencyCount = result.getFieldDependencies().size();
+        if (currentDependencyCount > previousDependencyCount) {
+            // 移除多余的依赖
+            for (int i = currentDependencyCount - 1; i >= previousDependencyCount; i--) {
+                result.getFieldDependencies().remove(i);
+            }
+            log.debug("Removed {} subquery dependencies", currentDependencyCount - previousDependencyCount);
+        }
+        
+        // 注册子查询别名
+        if (alias != null) {
+            // 子查询作为一个虚拟表，使用别名作为表名
+            tracker.registerTableAlias(alias, alias);
+            currentTableName = alias;
+            currentTableAlias = alias;
+            log.debug("Registered subquery alias: {}", alias);
+        }
+        
+        return false;
+    }
+    
+    /**
      * 访问 SELECT 列表项
      */
     @Override
