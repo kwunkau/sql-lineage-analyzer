@@ -1,0 +1,121 @@
+# SQL字段级血缘分析平台 - 生产环境配置
+# 版本: v1.0.0
+
+server:
+  port: 8080
+  compression:
+    enabled: true
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+
+spring:
+  profiles:
+    active: prod
+  
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/lineage_db?useSSL=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+    username: lineage_user
+    password: ${DB_PASSWORD:}  # 从环境变量读取
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+    # 连接池配置（HikariCP）
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  
+  # JPA 配置
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  
+  # MyBatis Plus 配置
+  mybatis-plus:
+    mapper-locations: classpath:mapper/**/*.xml
+    type-aliases-package: com.lineage.**.entity
+    configuration:
+      map-underscore-to-camel-case: true
+      log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    global-config:
+      db-config:
+        logic-delete-value: 1
+        logic-not-delete-value: 0
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 100MB
+      file-size-threshold: 2MB
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.lineage: INFO
+    com.lineage.mapper: DEBUG
+  file:
+    name: /var/log/lineage/application.log
+    max-size: 100MB
+    max-history: 30
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info,loggers,threaddump
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: false
+  info:
+    env:
+      enabled: true
+
+# 业务配置
+lineage:
+  # Kettle 文件配置
+  kettle:
+    upload-dir: /var/lineage/uploads
+    max-file-size: 50
+  
+  # 血缘分析配置
+  analyzer:
+    cache-enabled: true
+    cache-size: 1000
+    max-depth: 10
+    timeout-seconds: 60
+  
+  # 线程池配置
+  executor:
+    core-pool-size: 8
+    max-pool-size: 16
+    queue-capacity: 100
+    keep-alive-seconds: 60
+
+# 应用信息
+info:
+  app:
+    name: SQL字段级血缘分析平台
+    version: 1.0.0
+    description: 基于 Alibaba Druid 的SQL字段级血缘分析工具
