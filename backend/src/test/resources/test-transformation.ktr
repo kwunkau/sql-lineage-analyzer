@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+  <info>
+    <name>test-transformation</name>
+    <description>测试用Kettle转换文件</description>
+  </info>
+  
+  <step>
+    <name>表输入_用户表</name>
+    <type>TableInput</type>
+    <connection>MySQL-Test</connection>
+    <sql><![CDATA[SELECT id, name, email FROM users WHERE status = 1]]></sql>
+  </step>
+  
+  <step>
+    <name>表输出_目标表</name>
+    <type>TableOutput</type>
+    <connection>MySQL-Test</connection>
+    <schema>test_db</schema>
+    <table>target_users</table>
+  </step>
+  
+  <step>
+    <name>执行SQL_清理</name>
+    <type>ExecSQL</type>
+    <connection>MySQL-Test</connection>
+    <sql><![CDATA[DELETE FROM temp_table WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)]]></sql>
+  </step>
+  
+  <order>
+    <hop>
+      <from>表输入_用户表</from>
+      <to>表输出_目标表</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>表输出_目标表</from>
+      <to>执行SQL_清理</to>
+      <enabled>Y</enabled>
+    </hop>
+  </order>
+</transformation>
