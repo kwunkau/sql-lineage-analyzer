@@ -164,24 +164,57 @@
             </div>
             
             <div class="panel-body">
-                <!-- 文件上传区 -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>上传 Kettle 转换文件 (.ktr)</h3>
+                <!-- 标签页 -->
+                <div class="tabs" style="margin-bottom: 20px;">
+                    <button class="tab-btn active" data-tab="upload">文件上传</button>
+                    <button class="tab-btn" data-tab="history">上传历史</button>
+                </div>
+
+                <!-- 文件上传标签页 -->
+                <div id="upload-tab" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>上传 Kettle 转换文件 (.ktr)</h3>
+                        </div>
+                        
+                        <div class="upload-zone" id="upload-zone">
+                            <div class="upload-icon">📁</div>
+                            <h3>拖拽文件到这里或点击选择文件</h3>
+                            <p>支持 .ktr 文件，最大50MB，支持批量上传</p>
+                            <input type="file" id="file-input" class="file-input" accept=".ktr" multiple>
+                        </div>
+                        
+                        <div id="file-list" class="file-list"></div>
+                        
+                        <div class="button-group" style="margin-top: 16px;">
+                            <button id="parse-btn" class="btn btn-primary" disabled>解析文件</button>
+                            <button id="upload-save-btn" class="btn btn-success" disabled>上传并保存</button>
+                            <button id="clear-btn" class="btn btn-secondary">清空</button>
+                        </div>
                     </div>
-                    
-                    <div class="upload-zone" id="upload-zone">
-                        <div class="upload-icon">📁</div>
-                        <h3>拖拽文件到这里或点击选择文件</h3>
-                        <p>支持 .ktr 文件</p>
-                        <input type="file" id="file-input" class="file-input" accept=".ktr" multiple>
-                    </div>
-                    
-                    <div id="file-list" class="file-list"></div>
-                    
-                    <div class="button-group" style="margin-top: 16px;">
-                        <button id="parse-btn" class="btn btn-primary" disabled>解析文件</button>
-                        <button id="clear-btn" class="btn btn-secondary">清空</button>
+                </div>
+
+                <!-- 上传历史标签页 -->
+                <div id="history-tab" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>上传历史</h3>
+                            <button class="btn btn-primary" onclick="loadFileHistory()">刷新</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>文件名</th>
+                                    <th>转换名称</th>
+                                    <th>步骤数</th>
+                                    <th>SQL数</th>
+                                    <th>状态</th>
+                                    <th>上传时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-list"></tbody>
+                        </table>
                     </div>
                 </div>
 

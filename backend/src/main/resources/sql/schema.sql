@@ -50,3 +50,23 @@ CREATE TABLE IF NOT EXISTS column_metadata (
     KEY idx_table_id (table_id),
     KEY idx_column_name (column_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='字段元数据表';
+
+-- Kettle文件记录表
+CREATE TABLE IF NOT EXISTS kettle_file_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    file_name VARCHAR(200) NOT NULL COMMENT '文件名',
+    file_path VARCHAR(500) NOT NULL COMMENT '文件路径',
+    file_size BIGINT COMMENT '文件大小（字节）',
+    transformation_name VARCHAR(200) COMMENT '转换名称',
+    transformation_desc VARCHAR(500) COMMENT '转换描述',
+    step_count INT DEFAULT 0 COMMENT '步骤数量',
+    sql_count INT DEFAULT 0 COMMENT 'SQL数量',
+    hop_count INT DEFAULT 0 COMMENT '连接数量',
+    parse_status VARCHAR(20) DEFAULT 'pending' COMMENT '解析状态（pending/success/failed）',
+    error_message TEXT COMMENT '错误信息',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted INT DEFAULT 0 COMMENT '逻辑删除（0-未删除，1-已删除）',
+    KEY idx_status (parse_status),
+    KEY idx_create_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Kettle文件记录表';
