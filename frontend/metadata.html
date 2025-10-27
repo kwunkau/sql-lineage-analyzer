@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元数据管理 - SQL血缘分析平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .data-table th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+        .data-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+        .action-btn {
+            padding: 4px 12px;
+            margin: 0 4px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-edit { background: #3b82f6; color: white; }
+        .btn-delete { background: #ef4444; color: white; }
+        .btn-test { background: #10b981; color: white; }
+        .btn-import { background: #f59e0b; color: white; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>🔍 SQL 血缘分析平台</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">SQL分析</a>
+                <a href="metadata.html" class="nav-link active">元数据管理</a>
+                <a href="kettle.html" class="nav-link">Kettle解析</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="section-panel">
+            <div class="panel-header">
+                <h2>📊 元数据管理</h2>
+            </div>
+            
+            <div class="panel-body">
+                <!-- 标签页 -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="datasource">数据源</button>
+                    <button class="tab-btn" data-tab="tables">表元数据</button>
+                </div>
+
+                <!-- 数据源标签页 -->
+                <div id="datasource-tab" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>数据源列表</h3>
+                            <button class="btn btn-primary" onclick="showAddDataSourceModal()">+ 添加数据源</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>名称</th>
+                                    <th>类型</th>
+                                    <th>连接URL</th>
+                                    <th>数据库</th>
+                                    <th>描述</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="datasource-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 表元数据标签页 -->
+                <div id="tables-tab" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>表元数据列表</h3>
+                            <div>
+                                <select id="datasource-filter" class="form-control" style="display: inline-block; width: 200px; margin-right: 12px;">
+                                    <option value="">全部数据源</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="showAddTableModal()">+ 添加表</button>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>表名</th>
+                                    <th>Schema</th>
+                                    <th>表类型</th>
+                                    <th>描述</th>
+                                    <th>字段数</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tables-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载指示器 -->
+        <div id="loading" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>加载中...</p>
+        </div>
+    </main>
+
+    <!-- 添加数据源模态框 -->
+    <div id="datasource-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="datasource-modal-title">添加数据源</h3>
+                <button class="close-btn" onclick="closeDataSourceModal()">&times;</button>
+            </div>
+            <form id="datasource-form">
+                <input type="hidden" id="datasource-id">
+                <div class="form-group">
+                    <label>名称 *</label>
+                    <input type="text" id="datasource-name" required>
+                </div>
+                <div class="form-group">
+                    <label>类型 *</label>
+                    <select id="datasource-type" required>
+                        <option value="mysql">MySQL</option>
+                        <option value="hive">Hive</option>
+                        <option value="oracle">Oracle</option>
+                        <option value="spark">Spark</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>连接URL *</label>
+                    <input type="text" id="datasource-url" placeholder="jdbc:mysql://localhost:3306/database" required>
+                </div>
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="datasource-username">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="datasource-password">
+                </div>
+                <div class="form-group">
+                    <label>数据库名称</label>
+                    <input type="text" id="datasource-database">
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="datasource-description" rows="3"></textarea>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeDataSourceModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加表模态框 -->
+    <div id="table-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="table-modal-title">添加表</h3>
+                <button class="close-btn" onclick="closeTableModal()">&times;</button>
+            </div>
+            <form id="table-form">
+                <input type="hidden" id="table-id">
+                <div class="form-group">
+                    <label>数据源 *</label>
+                    <select id="table-datasource" required></select>
+                </div>
+                <div class="form-group">
+                    <label>表名 *</label>
+                    <input type="text" id="table-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Schema</label>
+                    <input type="text" id="table-schema">
+                </div>
+                <div class="form-group">
+                    <label>表类型</label>
+                    <select id="table-type">
+                        <option value="TABLE">TABLE</option>
+                        <option value="VIEW">VIEW</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="table-comment" rows="3"></textarea>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeTableModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>&copy; 2025 SQL字段级血缘分析平台</p>
+    </footer>
+
+    <script src="lib/axios.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/metadata.js"></script>
+</body>
+</html>

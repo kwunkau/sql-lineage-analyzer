@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kettle解析 - SQL血缘分析平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .upload-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 24px;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .upload-zone.dragover {
+            border-color: #2563eb;
+            background: #dbeafe;
+        }
+        .upload-icon {
+            font-size: 48px;
+            color: #9ca3af;
+            margin-bottom: 16px;
+        }
+        .file-input {
+            display: none;
+        }
+        .file-list {
+            margin-top: 16px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .file-name {
+            font-weight: 500;
+        }
+        .file-size {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            margin-bottom: 16px;
+        }
+        .sql-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .sql-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .sql-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .meta-tag {
+            background: #e5e7eb;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .sql-content {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .btn-analyze {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>🔍 SQL 血缘分析平台</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">SQL分析</a>
+                <a href="metadata.html" class="nav-link">元数据管理</a>
+                <a href="kettle.html" class="nav-link active">Kettle解析</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="section-panel">
+            <div class="panel-header">
+                <h2>🔧 Kettle 文件解析</h2>
+            </div>
+            
+            <div class="panel-body">
+                <!-- 文件上传区 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>上传 Kettle 转换文件 (.ktr)</h3>
+                    </div>
+                    
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-icon">📁</div>
+                        <h3>拖拽文件到这里或点击选择文件</h3>
+                        <p>支持 .ktr 文件</p>
+                        <input type="file" id="file-input" class="file-input" accept=".ktr" multiple>
+                    </div>
+                    
+                    <div id="file-list" class="file-list"></div>
+                    
+                    <div class="button-group" style="margin-top: 16px;">
+                        <button id="parse-btn" class="btn btn-primary" disabled>解析文件</button>
+                        <button id="clear-btn" class="btn btn-secondary">清空</button>
+                    </div>
+                </div>
+
+                <!-- 解析统计 -->
+                <div id="stats-section" style="display: none;">
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-steps">0</div>
+                            <div class="stat-label">步骤数量</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <div class="stat-value" id="stat-sqls">0</div>
+                            <div class="stat-label">SQL语句</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="stat-value" id="stat-hops">0</div>
+                            <div class="stat-label">连接数量</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SQL列表 -->
+                <div id="sql-results" class="card" style="display: none;">
+                    <div class="card-header">
+                        <h3>提取的 SQL 语句</h3>
+                    </div>
+                    <div id="sql-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载指示器 -->
+        <div id="loading" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>正在解析 Kettle 文件...</p>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>&copy; 2025 SQL字段级血缘分析平台</p>
+    </footer>
+
+    <script src="lib/axios.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/kettle.js"></script>
+</body>
+</html>

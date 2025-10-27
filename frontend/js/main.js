@@ -10,6 +10,24 @@
   document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
     bindEvents();
+    
+    // 检查是否有来自Kettle页面的SQL
+    const analyzeSql = sessionStorage.getItem('analyzeSql');
+    const dbType = sessionStorage.getItem('dbType');
+    if (analyzeSql) {
+      document.getElementById('sqlInput').value = analyzeSql;
+      if (dbType) {
+        document.getElementById('dbType').value = dbType;
+      }
+      // 清除sessionStorage
+      sessionStorage.removeItem('analyzeSql');
+      sessionStorage.removeItem('dbType');
+      
+      // 自动触发分析
+      setTimeout(() => {
+        document.getElementById('analyzeBtn').click();
+      }, 500);
+    }
   });
 
   /**
