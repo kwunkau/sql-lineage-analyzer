@@ -10,9 +10,37 @@ let selectedFiles = [];
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
+    initTabs();
     initUploadZone();
     initButtons();
 });
+
+/**
+ * 初始化标签页
+ */
+function initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            
+            // 切换按钮状态
+            tabBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 切换内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // 加载数据
+            if (tabName === 'history') {
+                loadFileHistory();
+            }
+        });
+    });
+}
 
 /**
  * 初始化上传区域
@@ -53,6 +81,7 @@ function initUploadZone() {
  */
 function initButtons() {
     document.getElementById('parse-btn').addEventListener('click', parseFiles);
+    document.getElementById('upload-save-btn').addEventListener('click', uploadAndSaveFiles);
     document.getElementById('clear-btn').addEventListener('click', clearFiles);
 }
 
@@ -71,8 +100,9 @@ function handleFiles(files) {
     selectedFiles = [...selectedFiles, ...ktrFiles];
     renderFileList();
     
-    // 启用解析按钮
+    // 启用按钮
     document.getElementById('parse-btn').disabled = false;
+    document.getElementById('upload-save-btn').disabled = false;
 }
 
 /**
@@ -106,6 +136,7 @@ function removeFile(index) {
     
     if (selectedFiles.length === 0) {
         document.getElementById('parse-btn').disabled = true;
+        document.getElementById('upload-save-btn').disabled = true;
     }
 }
 
@@ -116,6 +147,7 @@ function clearFiles() {
     selectedFiles = [];
     renderFileList();
     document.getElementById('parse-btn').disabled = true;
+    document.getElementById('upload-save-btn').disabled = true;
     document.getElementById('stats-section').style.display = 'none';
     document.getElementById('sql-results').style.display = 'none';
     document.getElementById('file-input').value = '';
@@ -276,4 +308,129 @@ function showLoading(show) {
  */
 function showMessage(message, type) {
     alert(message);  // 简单实现，可以替换为更好的UI组件
+}
+
+// ==================== 批量上传功能 ====================
+
+/**
+ * 上传并保存文件
+ */
+async function uploadAndSaveFiles() {
+    if (selectedFiles.length === 0) {
+        return;
+    }
+    
+    showLoading(true);
+    
+    try {
+        const formData = new FormData();
+        
+        // 添加所有文件
+        selectedFiles.forEach(file => {
+            formData.append('files', file);
+        });
+        
+        const response = await axios.post(`${API_BASE}/batch-upload`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        
+        if (response.data.code === 200) {
+            const result = response.data.data;
+            showMessage(`批量上传完成！\n成功: ${result.successCount}\n失败: ${result.failedCount}`, 'success');
+            
+            // 清空文件列表
+            clearFiles();
+            
+            // 切换到历史标签页
+            document.querySelector('.tab-btn[data-tab="history"]').click();
+        } else {
+            showMessage('上传失败: ' + response.data.message, 'error');
+        }
+    } catch (error) {
+        console.error('批量上传失败:', error);
+        showMessage('批量上传失败: ' + (error.response?.data?.message || error.message), 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+/**
+ * 加载文件历史
+ */
+async function loadFileHistory() {
+    showLoading(true);
+    try {
+        const response = await axios.get(`${API_BASE}/files`, {
+            params: { page: 1, size: 50 }
+        });
+        
+        if (response.data.code === 200) {
+            const records = response.data.data.records || [];
+            renderFileHistory(records);
+        } else {
+            showMessage('加载失败: ' + response.data.message, 'error');
+        }
+    } catch (error) {
+        console.error('加载历史失败:', error);
+        showMessage('加载历史失败', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+/**
+ * 渲染文件历史列表
+ */
+function renderFileHistory(records) {
+    const tbody = document.getElementById('history-list');
+    
+    if (records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">暂无上传记录</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = records.map(record => {
+        const statusBadge = record.parseStatus === 'success' 
+            ? '<span class="badge badge-success">成功</span>'
+            : '<span class="badge badge-error">失败</span>';
+        
+        const createTime = new Date(record.createTime).toLocaleString('zh-CN');
+        
+        return `
+            <tr>
+                <td>${record.fileName}</td>
+                <td>${record.transformationName || '-'}</td>
+                <td>${record.stepCount || 0}</td>
+                <td>${record.sqlCount || 0}</td>
+                <td>${statusBadge}</td>
+                <td>${createTime}</td>
+                <td>
+                    <button class="action-btn btn-delete" onclick="deleteFileRecord(${record.id})">删除</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+/**
+ * 删除文件记录
+ */
+async function deleteFileRecord(id) {
+    if (!confirm('确定要删除此文件记录吗？')) {
+        return;
+    }
+    
+    try {
+        const response = await axios.delete(`${API_BASE}/files/${id}`);
+        if (response.data.code === 200) {
+            showMessage('删除成功', 'success');
+            loadFileHistory();
+        } else {
+            showMessage('删除失败: ' + response.data.message, 'error');
+        }
+    } catch (error) {
+        showMessage('删除失败', 'error');
+    }
 }
